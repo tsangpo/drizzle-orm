@@ -23,7 +23,7 @@ on:
 jobs:
   test:
     # only run on all pushes or pull requests from forks
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    if: false && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
       matrix:
         shard:
@@ -107,8 +107,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.19'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20.19"
+          registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v3
         name: Install pnpm
@@ -233,7 +233,7 @@ jobs:
 
   attw:
     # only run on all pushes or pull requests from forks
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    if: false && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
       matrix:
         package:
@@ -251,8 +251,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v3
         name: Install pnpm
@@ -311,12 +311,12 @@ jobs:
       - name: Build
         if: steps.checks.outputs.has_new_release == 'true'
         run: pnpm build
-      
+
       - name: Pack
         if: steps.checks.outputs.has_new_release == 'true'
         working-directory: ${{ matrix.package }}
         run: npm run pack
-  
+
       - name: Run @arethetypeswrong/cli
         if: steps.checks.outputs.has_new_release == 'true'
         working-directory: ${{ matrix.package }}
@@ -324,7 +324,7 @@ jobs:
 
   release:
     # only run on all pushes or pull requests from forks
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    if: false && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     needs:
       - test
       - attw
@@ -345,16 +345,16 @@ jobs:
       id-token: write # for OIDC
     # force empty so npm can use OIDC
     env:
-      NODE_AUTH_TOKEN: ""   
+      NODE_AUTH_TOKEN: ""
       NPM_TOKEN: ""
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with: { run_install: false }
       - uses: actions/setup-node@v6
-        with: { node-version: '24', cache: 'pnpm', cache-dependency-path: pnpm-lock.yaml }
+        with: { node-version: "24", cache: "pnpm", cache-dependency-path: pnpm-lock.yaml }
       - run: pnpm install --frozen-lockfile --prefer-offline
-    
+
       # >= 11.5.1 for trusted publishing
       - name: Update NPM
         run: npm install -g npm@latest
@@ -413,4 +413,3 @@ jobs:
 
           # Post release message to Discord
           # curl -X POST -H "Content-Type: application/json" -d "{\"embeds\": [{\"title\": \"New \`${{ matrix.package }}\` release! 🎉\", \"url\": \"https://www.npmjs.com/package/${{ matrix.package }}/v/$version\", \"color\": \"12907856\", \"fields\": [{\"name\": \"Version\", \"value\": \"\`$version\`\"}, {\"name\": \"Tag\", \"value\": \"\`$tag\`\"}]}]}" ${{ secrets.DISCORD_DEV_RELEASE_WEBHOOK_URL }}
-

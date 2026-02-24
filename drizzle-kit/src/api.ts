@@ -187,6 +187,63 @@ export const pushSchema = async (
 	};
 };
 
+export const pushSchema2 = async (
+	imports: Record<string, unknown>,
+	db: DB,
+	schemaFilters?: string[],
+	tablesFilter?: string[],
+	extensionsFilters?: Config['extensionsFilters'],
+) => {
+	const { applyPgSnapshotsDiff } = await import('./snapshotsDiffer');
+	const filters = (tablesFilter ?? []).concat(
+		getTablesFilterByExtensions({ extensionsFilters, dialect: 'postgresql' }),
+	);
+
+	const cur = generateDrizzleJson(imports);
+	const { schema: prev } = await pgPushIntrospect(
+		db,
+		filters,
+		schemaFilters ?? ['public'],
+		undefined,
+	);
+
+	const validatedPrev = pgSchema.parse(prev);
+	const validatedCur = pgSchema.parse(cur);
+
+	const squashedPrev = squashPgScheme(validatedPrev, 'push');
+	const squashedCur = squashPgScheme(validatedCur, 'push');
+
+	const { statements } = await applyPgSnapshotsDiff(
+		squashedPrev,
+		squashedCur,
+		schemasResolver,
+		enumsResolver,
+		sequencesResolver,
+		policyResolver,
+		indPolicyResolver,
+		roleResolver,
+		tablesResolver,
+		columnsResolver,
+		viewsResolver,
+		validatedPrev,
+		validatedCur,
+		'push',
+	);
+
+	const { shouldAskForApprove, statementsToExecute, infoToPrint } = await pgSuggestions(db, statements);
+
+	return {
+		hasDataLoss: shouldAskForApprove,
+		warnings: infoToPrint,
+		statementsToExecute,
+		apply: async () => {
+			for (const dStmnt of statementsToExecute) {
+				await db.query(dStmnt);
+			}
+		},
+	};
+};
+
 export const startStudioPostgresServer = async (
 	imports: Record<string, unknown>,
 	credentials: PostgresCredentials | {

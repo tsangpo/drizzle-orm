@@ -9,6 +9,7 @@ on:
 
 jobs:
   switch:
+    if: false
     runs-on: ubuntu-24.04
     outputs:
       target: ${{ steps.route.outputs.target }}
@@ -28,8 +29,8 @@ jobs:
           fi
 
   run-feature:
+    if: false && needs.switch.outputs.target == 'feature'
     needs: switch
-    if: needs.switch.outputs.target == 'feature'
     uses: ./.github/workflows/release-feature-branch.yaml
     secrets:
       PLANETSCALE_CONNECTION_STRING: ${{ secrets.PLANETSCALE_CONNECTION_STRING }}
@@ -42,8 +43,8 @@ jobs:
       LIBSQL_REMOTE_TOKEN: ${{ secrets.LIBSQL_REMOTE_TOKEN }}
 
   run-latest:
+    if: false && needs.switch.outputs.target == 'latest'
     needs: switch
-    if: needs.switch.outputs.target == 'latest'
     uses: ./.github/workflows/release-latest.yaml
     secrets:
       PLANETSCALE_CONNECTION_STRING: ${{ secrets.PLANETSCALE_CONNECTION_STRING }}

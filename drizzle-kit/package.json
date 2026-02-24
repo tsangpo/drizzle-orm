@@ -1,6 +1,6 @@
 {
-	"name": "drizzle-kit",
-	"version": "0.31.9",
+	"name": "@tsangpo/drizzle-kit",
+	"version": "0.31.10",
 	"homepage": "https://orm.drizzle.team",
 	"keywords": [
 		"drizzle",
@@ -20,6 +20,7 @@
 		"schema"
 	],
 	"publishConfig": {
+		"access": "public",
 		"provenance": true
 	},
 	"repository": {
@@ -40,7 +41,7 @@
 		"build:dev": "rm -rf ./dist && tsx build.dev.ts && tsc -p tsconfig.cli-types.json && chmod +x ./dist/index.cjs",
 		"pack": "cp package.json README.md dist/ && (cd dist && npm pack --pack-destination ..) && rm -f package.tgz && mv *.tgz package.tgz",
 		"tsc": "tsc -p tsconfig.build.json --noEmit",
-		"publish": "npm publish package.tgz"
+		"publish": "npm publish package.tgz --access public"
 	},
 	"dependencies": {
 		"@drizzle-team/brocli": "^0.10.2",

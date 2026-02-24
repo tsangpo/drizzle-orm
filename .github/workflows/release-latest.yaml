@@ -22,6 +22,7 @@ on:
 
 jobs:
   test:
+    if: false
     strategy:
       matrix:
         shard:
@@ -105,8 +106,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.19'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20.19"
+          registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v3
         name: Install pnpm
@@ -220,6 +221,7 @@ jobs:
           esac
 
   attw:
+    if: false
     strategy:
       matrix:
         package:
@@ -237,8 +239,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18.18"
+          registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v3
         name: Install pnpm
@@ -292,18 +294,19 @@ jobs:
       - name: Build
         if: steps.checks.outputs.has_new_release == 'true'
         run: pnpm build
-      
+
       - name: Pack
         if: steps.checks.outputs.has_new_release == 'true'
         working-directory: ${{ matrix.package }}
         run: npm run pack
-  
+
       - name: Run @arethetypeswrong/cli
         if: steps.checks.outputs.has_new_release == 'true'
         working-directory: ${{ matrix.package }}
         run: bunx attw package.tgz
 
   release:
+    if: false
     permissions:
       contents: write # for creating GitHub releases
       id-token: write # for OIDC
@@ -384,9 +387,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with: { run_install: false }
       - uses: actions/setup-node@v6
-        with: { node-version: '24', cache: 'pnpm', cache-dependency-path: pnpm-lock.yaml }
+        with: { node-version: "24", cache: "pnpm", cache-dependency-path: pnpm-lock.yaml }
       - run: pnpm install --frozen-lockfile --prefer-offline
-    
+
       # >= 11.5.1 for trusted publishing
       - name: Update NPM
         run: npm install -g npm@latest
@@ -440,7 +443,7 @@ jobs:
         working-directory: ${{ matrix.package }}
         shell: bash
         run: npm run pack
-      
+
       - name: Publish
         if: steps.checks.outputs.has_new_release == 'true'
         working-directory: ${{ matrix.package }}
